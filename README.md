@@ -5,6 +5,8 @@ active PulseAudio sink input.
 The option `--default-to-sink` only makes sense together with the option
 `--filter-active`.
 
+For notifications GTK4 is required.
+
 ## Install requirements
 ```
 pip install --user -r requirements.txt
