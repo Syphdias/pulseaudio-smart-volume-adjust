@@ -12,7 +12,9 @@ from typing import Optional
 from pulsectl import Pulse, PulseSinkInputInfo
 
 
-def notify(title: str, text: str) -> None:
+def notify(
+    title: str, text: str, notification_id_file: str = None, verbose: int = 0
+) -> None:
     """Use GTK to send notifications"""
     try:
         import gi
@@ -31,8 +33,36 @@ def notify(title: str, text: str) -> None:
 
     Notify.init("smart-volume-adjust")
 
+    if verbose:
+        print("notification id file:", notification_id_file)
+
+    # check if we have a know notification id
+    notification_id = None
+    try:
+        with open(notification_id_file, "r") as f:
+            try:
+                notification_id = int(f.readline())
+            except ValueError:
+                print(
+                    f"notification id file malformated: {notification_id_file}",
+                    file=stderr,
+                )
+    except FileNotFoundError:
+        pass
+
+    if verbose:
+        print("notification id:", notification_id)
+
     n = Notify.Notification.new(title, text)
+    if notification_id:
+        n.set_property("id", notification_id)
     n.show()
+
+    # save notification id to enable subsequent call to read it
+    # and modify notification
+    if not notification_id:
+        with open(notification_id_file, "w") as f:
+            f.write(str(n.get_property("id")))
 
 
 def sink_inputs_filter(
@@ -100,6 +130,7 @@ def change_volume(
     sink_input: PulseSinkInputInfo = None,
     default_to_sink: bool = False,
     notify_: bool = False,
+    notify_absolute: bool = False,
     verbose: int = 0,
     dry: bool = False,
 ) -> None:
@@ -114,9 +145,21 @@ def change_volume(
                 f"by {volume_change:+.2f} to {sink_input.volume.value_flat:.0%}",
             )
         if notify_:
+            notification_id_file = None
+            notification_text = (
+                f"{volume_change:+.2f} for {pulse.client_info(sink_input.client).name}"
+            )
+            if notify_absolute:
+                notification_id_file = (
+                    f"/tmp/smart-volume-adjust-sinkinput-{sink_input.index}"
+                )
+                notification_text = f"{sink_input.volume.value_flat:.0%} for {pulse.client_info(sink_input.client).name}"
+
             notify(
                 "Sink Input Volume",
-                f"{volume_change:+.2f} for {pulse.client_info(sink_input.client).name}",
+                notification_text,
+                notification_id_file,
+                verbose,
             )
 
     elif default_to_sink:
@@ -130,9 +173,19 @@ def change_volume(
                 f"by {current_sink.description} to {current_sink.volume.value_flat:.0%}",
             )
         if notify_:
+            notification_id_file = None
+            notification_text = f"{volume_change:+.2f} for {current_sink.description}"
+            if notify_absolute:
+                notification_id_file = (
+                    f"/tmp/smart-volume-adjust-sink-{current_sink.index}"
+                )
+                notification_text = f"{current_sink.volume.value_flat:.0%} for {current_sink.description}"
+
             notify(
                 "Sink Volume",
-                f"{volume_change:+.2f} for {current_sink.description}",
+                notification_text,
+                notification_id_file,
+                verbose,
             )
 
 
@@ -160,6 +213,7 @@ def main(args) -> None:
         sink_input_to_change,
         args.default_to_sink,
         args.notify,
+        args.notify_absolute,
         args.verbose,
         args.dry_run,
     )
@@ -214,6 +268,12 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
         help="Use Gtk to send a notification which volume was changed and by how much",
+    )
+    parser.add_argument(
+        "--notify-absolute",
+        action="store_true",
+        default=False,
+        help="Show absolute volume instead of volume change",
     )
 
     args = parser.parse_args()
