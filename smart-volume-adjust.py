@@ -21,16 +21,18 @@ def notify(title: str, text: str) -> None:
         gi.require_version("Notify", "0.7")
         from gi.repository import Notify
 
-        Notify.init("smart-volume-adjust")
-        n = Notify.Notification.new(title, text)
-        n.show()
-
     except ModuleNotFoundError:
         print(
             "Sorry, something went wrong with the notification. "
             "Are you using Gtk 3.0?",
             file=stderr,
         )
+        return
+
+    Notify.init("smart-volume-adjust")
+
+    n = Notify.Notification.new(title, text)
+    n.show()
 
 
 def sink_inputs_filter(
