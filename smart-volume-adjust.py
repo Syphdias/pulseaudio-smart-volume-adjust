@@ -110,8 +110,8 @@ def change_volume(
             pulse.sink_input_volume_set(sink_input.index, sink_input.volume)
         if verbose:
             print(
-                "Changing Sink Input Volume for "
-                f"{pulse.client_info(sink_input.client).name} by {volume_change:+.2f}",
+                f"Changing Sink Input Volume for {pulse.client_info(sink_input.client).name} "
+                f"by {volume_change:+.2f} to {sink_input.volume.value_flat:.0%}",
             )
         if notify_:
             notify(
@@ -126,8 +126,8 @@ def change_volume(
             pulse.sink_volume_set(current_sink.index, current_sink.volume)
         if verbose:
             print(
-                "Changing Sink Input Volume for "
-                f"{volume_change:+.2f} by {current_sink.description}",
+                f"Changing Sink Volume for {volume_change:+.2f} "
+                f"by {current_sink.description} to {current_sink.volume.value_flat:.0%}",
             )
         if notify_:
             notify(
