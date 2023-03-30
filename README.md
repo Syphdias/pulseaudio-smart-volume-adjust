@@ -31,7 +31,7 @@ A message will be shown with which sink or sink input was changed and by how
 much (`--notify`). In this case instead of the relative change the current
 volume will be shown (`--notify-abolute`).
 
-## Finding Sink Names
+## Finding Sink Input Names
 
 To find a good regex pattern you can use the following command that does not
 change volume of any sink input, has a regex pattern that matches everything,
