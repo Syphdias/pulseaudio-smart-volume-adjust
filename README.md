@@ -1,18 +1,27 @@
 ## About
 This script changed the volume of either the active PulseAudio sink or the
-active PulseAudio sink input.
+active PulseAudio sink input. Documentation (and FAQ – if any) is found in
+this README.
 
-The option `--default-to-sink` only makes sense together with the option
-`--filter-active`.
-
-For notifications GTK4 is required.
+- There is currently no package to install the script.
+  You need to download it from [here](
+  https://raw.githubusercontent.com/Syphdias/pulseaudio-smart-volume-adjust/main/smart-volume-adjust.py)
+  Or clone the repository.
+- Feel free to file issues to report bugs, ask questions,
+  or request features.
+- Feel free to open a pull request. Please use the [black](
+  https://github.com/psf/black) code formatter.
 
 ## Install requirements
 ```
 pip install --user -r requirements.txt
 ```
+For notifications GTK4 is prerequisite. The above command will not install it.
+Please use your operating systems means to do so.
 
-## Example
+## Usage
+The following example shows most options I would expect to get used when using
+the script. You can also use `--help` to show the available parameters.
 
 ```sh
 smart-volume-adjust.py \
@@ -30,6 +39,11 @@ optional for increasind volume).
 A message will be shown with which sink or sink input was changed and by how
 much (`--notify`). In this case instead of the relative change the current
 volume will be shown (`--notify-abolute`).
+
+
+The option `--default-to-sink` only makes sense together with the option
+`--filter-active`.
+
 
 ## Finding Sink Input Names
 
