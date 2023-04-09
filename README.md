@@ -1,12 +1,12 @@
 ## About
 This script changed the volume of either the active PulseAudio sink or the
-active PulseAudio sink input. Documentation (and FAQ – if any) is found in
-this README.
+active PulseAudio sink input.
 
+- Documentation (and FAQ – if any) can found in this README.
 - There is currently no package to install the script.
   You need to download it from [here](
   https://raw.githubusercontent.com/Syphdias/pulseaudio-smart-volume-adjust/main/smart-volume-adjust.py)
-  Or clone the repository.
+  or clone the repository.
 - Feel free to file issues to report bugs, ask questions,
   or request features.
 - Feel free to open a pull request. Please use the [black](
@@ -24,7 +24,7 @@ The following example shows most options I would expect to get used when using
 the script. You can also use `--help` to show the available parameters.
 
 ```sh
-smart-volume-adjust.py \
+./smart-volume-adjust.py \
     --filter-active --default-to-sink --notify --notify-absolute \
     +.05 "Spotify" "Google Chrome" ""
 ```
