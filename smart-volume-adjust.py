@@ -13,7 +13,11 @@ from pulsectl import Pulse, PulseSinkInputInfo
 
 
 def notify(
-    title: str, text: str, notification_id_file: str = None, verbose: int = 0
+    title: str,
+    text: str,
+    notification_id_file: Optional[str] = None,
+    verbose: int = 0,
+    progress: Optional[int] = None,
 ) -> None:
     """Use GTK to send notifications"""
     try:
@@ -21,7 +25,7 @@ def notify(
 
         gi.require_version("Gtk", "4.0")
         gi.require_version("Notify", "0.7")
-        from gi.repository import Notify
+        from gi.repository import GLib, Notify
 
     except ModuleNotFoundError:
         print(
@@ -38,17 +42,18 @@ def notify(
 
     # check if we have a know notification id
     notification_id = None
-    try:
-        with open(notification_id_file, "r") as f:
-            try:
-                notification_id = int(f.readline())
-            except ValueError:
-                print(
-                    f"notification id file malformated: {notification_id_file}",
-                    file=stderr,
-                )
-    except FileNotFoundError:
-        pass
+    if notification_id_file:
+        try:
+            with open(notification_id_file, "r") as f:
+                try:
+                    notification_id = int(f.readline())
+                except ValueError:
+                    print(
+                        f"notification id file malformated: {notification_id_file}",
+                        file=stderr,
+                    )
+        except FileNotFoundError:
+            pass
 
     if verbose:
         print("notification id:", notification_id)
@@ -56,6 +61,8 @@ def notify(
     n = Notify.Notification.new(title, text)
     if notification_id:
         n.set_property("id", notification_id)
+    if progress:
+        n.set_hint("value", GLib.Variant("i", progress))
     n.show()
 
     # save notification id to enable subsequent call to read it
@@ -85,19 +92,16 @@ def sink_inputs_filter(
         # and keep track of how many elements we have already removed to correct for in in pop()
         removed_count = 0
         for idx, sink_input in enumerate(sink_inputs[:]):
-            if re.match(sink_inputs_pattern, pulse.client_info(sink_input.client).name):
+            pulse_client_name = pulse.client_info(sink_input.client).name
+            if re.match(sink_inputs_pattern, pulse_client_name):
                 sink_inputs_filtered.append(sink_input)
                 sink_inputs.pop(idx - removed_count)
                 removed_count += 1
                 if verbose:
-                    print(
-                        f"  sink_input matched: {pulse.client_info(sink_input.client).name}"
-                    )
+                    print(f"  sink_input matched: {pulse_client_name}")
             else:
                 if verbose:
-                    print(
-                        f"  sink_input skipped: {pulse.client_info(sink_input.client).name}"
-                    )
+                    print(f"  sink_input skipped: {pulse_client_name}")
 
     if verbose:
         print("filtered sink inputs:")
@@ -127,7 +131,7 @@ def sink_input_with_sound(
 def change_volume(
     pulse: Pulse,
     volume_change: float,
-    sink_input: PulseSinkInputInfo = None,
+    sink_input: Optional[PulseSinkInputInfo] = None,
     default_to_sink: bool = False,
     notify_: bool = False,
     notify_absolute: bool = False,
@@ -160,6 +164,8 @@ def change_volume(
                 notification_text,
                 notification_id_file,
                 verbose,
+                # convert 0-2 to 0-200 but scale it down for the progress bar
+                int(100 / 2 * sink_input.volume.value_flat),
             )
 
     elif default_to_sink:
@@ -186,6 +192,8 @@ def change_volume(
                 notification_text,
                 notification_id_file,
                 verbose,
+                # convert 0-2 to 0-200 but scale it down for the progress bar
+                int(100 / 2 * current_sink.volume.value_flat),
             )
 
 
