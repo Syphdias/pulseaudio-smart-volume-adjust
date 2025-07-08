@@ -1,0 +1,9 @@
+[project]
+name = "pulseaudio-smart-volume-adjust"
+version = "1.0.0"
+description = "Script to adjust pulseaudo sink inputs or sink depending on which has output and on a given priority."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pulsectl>=24.12.0",
+]
