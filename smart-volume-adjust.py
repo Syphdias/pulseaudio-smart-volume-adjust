@@ -7,7 +7,7 @@ volume
 import re
 from argparse import ArgumentParser
 from sys import stderr
-from typing import Optional
+from pathlib import Path
 
 from pulsectl import Pulse, PulseSinkInputInfo
 
@@ -15,9 +15,9 @@ from pulsectl import Pulse, PulseSinkInputInfo
 def notify(
     title: str,
     text: str,
-    notification_id_file: Optional[str] = None,
+    notification_id_file: str | None = None,
     verbose: int = 0,
-    progress: Optional[int] = None,
+    progress: int | None = None,
 ) -> None:
     """Use GTK to send notifications"""
     try:
@@ -30,7 +30,7 @@ def notify(
     except ModuleNotFoundError:
         print(
             "Sorry, something went wrong with the notification. "
-            "Are you using Gtk 3.0?",
+            "Are you using Gtk 4.0?",
             file=stderr,
         )
         return
@@ -44,16 +44,14 @@ def notify(
     notification_id = None
     if notification_id_file:
         try:
-            with open(notification_id_file, "r") as f:
-                try:
-                    notification_id = int(f.readline())
-                except ValueError:
-                    print(
-                        f"notification id file malformated: {notification_id_file}",
-                        file=stderr,
-                    )
+            notification_id = int(Path(notification_id_file).read_text())
         except FileNotFoundError:
             pass
+        except ValueError:
+            print(
+                f"notification id file malformated: {notification_id_file}",
+                file=stderr,
+            )
 
     if verbose:
         print("notification id:", notification_id)
@@ -67,14 +65,13 @@ def notify(
 
     # save notification id to enable subsequent call to read it
     # and modify notification
-    if not notification_id:
-        with open(notification_id_file, "w") as f:
-            f.write(str(n.get_property("id")))
+    if not notification_id and notification_id_file:
+        Path(notification_id_file).write_text(str(n.get_property("id")))
 
 
 def sink_inputs_filter(
     pulse: Pulse,
-    sink_inputs_patterns: list = None,
+    sink_inputs_patterns: list | None = None,
     verbose: int = 0,
 ) -> list[PulseSinkInputInfo]:
     """
@@ -115,7 +112,7 @@ def sink_input_with_sound(
     pulse: Pulse,
     priority_sink_inputs: list,
     verbose: int = 0,
-) -> Optional[PulseSinkInputInfo]:
+) -> PulseSinkInputInfo | None:
     """Return first sink from list with sound output >0"""
     for sink_input in priority_sink_inputs:
         # using corked here might be a mistake since it might mean
@@ -131,7 +128,7 @@ def sink_input_with_sound(
 def change_volume(
     pulse: Pulse,
     volume_change: float,
-    sink_input: Optional[PulseSinkInputInfo] = None,
+    sink_input: PulseSinkInputInfo | None = None,
     default_to_sink: bool = False,
     notify_: bool = False,
     notify_absolute: bool = False,
