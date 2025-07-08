@@ -1,4 +1,5 @@
 ## About
+
 This script changed the volume of either the active PulseAudio sink or the
 active PulseAudio sink input.
 
@@ -13,13 +14,18 @@ active PulseAudio sink input.
   https://github.com/psf/black) code formatter.
 
 ## Install requirements
+
+You can either use `uv` or install requirements via pip.
+
 ```
 pip install --user -r requirements.txt
 ```
+
 For notifications GTK4 is prerequisite. The above command will not install it.
 Please use your operating systems means to do so.
 
 ## Usage
+
 The following example shows most options I would expect to get used when using
 the script. You can also use `--help` to show the available parameters.
 
@@ -40,10 +46,8 @@ A message will be shown with which sink or sink input was changed and by how
 much (`--notify`). In this case instead of the relative change the current
 volume will be shown (`--notify-abolute`).
 
-
 The option `--default-to-sink` only makes sense together with the option
 `--filter-active`.
-
 
 ## Finding Sink Input Names
 
@@ -53,4 +57,10 @@ and shows what was matched by the regex patterns.
 
 ```sh
 smart-volume-adjust.py --dry-run -v -.001 "Test" ""
+```
+
+## Updating `requirements.txt` after Dependency Update
+
+```sh
+uv export --no-hashes --format requirements-txt > requirements.txt
 ```
