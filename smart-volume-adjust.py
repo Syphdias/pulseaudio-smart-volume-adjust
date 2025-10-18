@@ -119,8 +119,8 @@ def sink_input_with_sound(
         # that the corked setting is enabled (which is shitty anyways)
         # debug: pacmd list-sink-inputs |grep -e state: -e index: -e client:
         if not sink_input.corked:
-            # listen for .09 seconds to sink_input streaming to default sink
-            if pulse.get_peak_sample(None, 0.09, sink_input.index):
+            # listen for .1 seconds to sink_input streaming to default sink
+            if pulse.get_peak_sample(None, 0.1, sink_input.index):
                 return sink_input
     return None
 
